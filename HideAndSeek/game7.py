@@ -8,11 +8,11 @@ pygame.init()
 pygame.mixer.init()  # Khởi tạo hệ thống âm thanh
 
 # Cài đặt cửa sổ game
-DISPLAYSURF = pygame.display.set_mode((1260, 670))
+DISPLAYSURF = pygame.display.set_mode((1248 , 688))
 pygame.display.set_caption("Hide And Seek")
 footstep = 20
 path = []  # Thêm này cùng với các biến toàn cục khác
-
+tmx_data = pytmx.util_pygame.load_pygame("HideAndSeek\\Map\\tmxFile\\Map1.tmx")
 # Trạng thái game
 MAIN_MENU = 0
 RULES = 1
@@ -80,7 +80,7 @@ def load_image(path, size=None):
 image_path = "HideAndSeek\\Image\\"
 
 # Background
-#1248 x 
+#1248 x 688
 background = load_image(os.path.join(image_path, "Background.jpg"), (1260, 200))
 ground = load_image(os.path.join(image_path, "Ground.png"), (1260, 540))
 mainbackground = load_image(os.path.join(image_path, "menubackground.jpg"), (1260, 700))

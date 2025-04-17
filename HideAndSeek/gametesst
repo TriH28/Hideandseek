@@ -1,0 +1,24 @@
+import pygame, sys, random, time, os, heapq
+from pygame.locals import *
+import pytmx
+pygame.init()
+screen = pygame.display.set_mode((1248 , 688))
+tmx_data = pytmx.util_pygame.load_pygame("HideAndSeek\\Map\\tmxFile\\Map1.tmx")
+def draw_map():
+    for layer in tmx_data.visible_layers:
+        if isinstance(layer, pytmx.TiledTileLayer):
+            for x, y, gid in layer:
+                tile = tmx_data.get_tile_image_by_gid(gid)
+                if tile:
+                    screen.blit(tile, (x * tmx_data.tilewidth, y * tmx_data.tileheight))
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    screen.fill((0, 0, 0))
+    draw_map()
+    pygame.display.flip()
+
+pygame.quit()
