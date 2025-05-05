@@ -7,7 +7,20 @@ import pytmx
 pygame.init()
 pygame.mixer.init()  # Khởi tạo hệ thống âm thanh
 
-
+# Cài đặt cửa sổ game
+DISPLAYSURF = pygame.display.set_mode((1248 , 688))
+pygame.display.set_caption("Hide And Seek")
+footstep = 20
+path = []  # Thêm này cùng với các biến toàn cục khác
+tmx_data = pytmx.util_pygame.load_pygame("HideAndSeek\\Map\\tmxFile\\Map1.tmx")
+# Trạng thái game
+MAIN_MENU = 0
+RULES = 1
+SETTINGS = 2
+HIDING = 3
+SEEKING = 4
+GAME_OVER = 5
+game_state = MAIN_MENU  # Bắt đầu từ menu chính
 
 # Cài đặt game
 
