@@ -45,7 +45,22 @@ GRAY = (100, 100, 100)
 fpsclock = pygame.time.Clock()
 FPS = 30 # Tăng FPS để mượt hơn
 
-
+# Âm thanh
+background_music = pygame.mixer.Sound("HideAndSeek\\Audio\\Musics\\4 - Village.ogg")
+game_music = pygame.mixer.Sound("HideAndSeek\\Audio\\Musics\\1 - Adventure Begin.ogg")
+try:
+    click_sound = pygame.mixer.Sound("HideAndSeek\\Audio\\Sounds\\Menu\\Accept4.wav")
+    win_sound = pygame.mixer.Sound("HideAndSeek\\Audio\\Jingles\\Success4.wav")
+    lose_sound = pygame.mixer.Sound("HideAndSeek\\Audio\\Jingles\\GameOver4.wav")
+    background_music = pygame.mixer.Sound("HideAndSeek\\Audio\\Musics\\4 - Village.ogg")
+    background_music.set_volume(0.01)
+    click_sound.set_volume(1)
+    background_music.play(-1)  # Lặp lại nhạc nền
+except:
+    print("Không tìm thấy file âm thanh, game sẽ chạy không có âm thanh")
+    no_sound = True
+else:
+    no_sound = False
 
 # Load hình ảnh
 def load_image(path, size=None):
