@@ -11,7 +11,7 @@ pygame.init()
 DISPLAYSURF = pygame.display.set_mode((1260, 670))
 pygame.display.set_caption("Hide And Seek - Algorithm Comparison")
 footstep = 20
-path = []  # Thêm này cùng với các biến toàn cục khác
+path = []
 
 # Trạng thái game
 MAIN_MENU = 0
@@ -20,16 +20,16 @@ SETTINGS = 2
 HIDING = 3
 SEEKING = 4
 GAME_OVER = 5
-game_state = MAIN_MENU  # Bắt đầu từ menu chính
+game_state = MAIN_MENU  
 
 # Cài đặt game
-SEEKING_TIME = 15  # giâyß
+SEEKING_TIME = 15  
 
 seeking_timer = SEEKING_TIME
-game_result = None  # "win" hoặc "lose"
+game_result = None  
 # Thêm vào phần khai báo biến toàn cục
 initial_seeker_pos = None
-show_initial_pos = True  # Hiển thị vị trí ban đầu trong giai đoạn hiding
+show_initial_pos = True  
 
 # Màu sắc
 WHITE = (255, 255, 255)
@@ -42,7 +42,7 @@ GRAY = (100, 100, 100)
 COLORS = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255), (0, 255, 255), (255, 165, 0)]
 # FPS
 fpsclock = pygame.time.Clock()
-FPS = 30 # Tăng FPS để mượt hơn
+FPS = 30 
 
 
 # Load hình ảnh
@@ -329,7 +329,7 @@ class Seeker:
     def backtracking_search(self, goal):
         """Triển khai backtracking theo chuẩn CSP với giới hạn độ sâu"""
         start = (self.rect.x, self.rect.y)
-        max_depth = 100  # Giới hạn độ sâu để tránh đệ quy vô hạn
+        max_depth = 100
         path = []
         visited = set()
 
@@ -366,9 +366,9 @@ class Seeker:
                 path.append(next_pos)
                 if backtrack(next_pos, depth + 1):
                     return True
-                path.pop()  # Quay lui nếu không dẫn đến mục tiêu
+                path.pop()  
 
-            visited.remove(current)  # Quan trọng: hủy đánh dấu khi quay lui
+            visited.remove(current)  
             return False
 
         if backtrack(start, 0):
@@ -381,7 +381,7 @@ class Seeker:
         # Nếu đã từng thấy mục tiêu, lưu lại vị trí cuối cùng
         if not hasattr(self, 'last_known_pos'):
             self.last_known_pos = None
-            self.belief_map = {}  # Bản đồ niềm tin về vị trí mục tiêu
+            self.belief_map = {} 
         
         # Kiểm tra nếu mục tiêu trong tầm nhìn
         if (abs(start[0] - goal[0]) < vision_radius and 
@@ -393,7 +393,7 @@ class Seeker:
         if self.last_known_pos:
             # Cập nhật belief map - giảm dần độ tin cậy theo thời gian
             for pos in self.belief_map:
-                self.belief_map[pos] *= 0.9  # Decay factor
+                self.belief_map[pos] *= 0.9 
             
             # Thêm vị trí mới với xác suất cao
             self.belief_map[self.last_known_pos] = self.belief_map.get(self.last_known_pos, 0) + 0.5
@@ -446,7 +446,7 @@ class Seeker:
 
     def simple_hill_search(self, goal, max_attempts=100):
         def get_score(pos):
-            return -((pos[0] - goal[0])**2 + (pos[1] - goal[1])**2)  # Euclidean distance âm
+            return -((pos[0] - goal[0])**2 + (pos[1] - goal[1])**2)  
 
         def is_goal(pos):
             return abs(pos[0] - goal[0]) < 30 and abs(pos[1] - goal[1]) < 30
@@ -466,11 +466,11 @@ class Seeker:
                     neighbors.append(next_pos)
 
             if not neighbors:
-                break  # Hoặc thử restart/ngẫu nhiên
+                break  
 
             best_neighbor = max(neighbors, key=get_score)
             if get_score(best_neighbor) <= get_score(current):
-                break  # Local maxima
+                break  
 
             current = best_neighbor
             path.append(current)
@@ -496,7 +496,7 @@ seekers = [
 class QLearningSeeker(Seeker):
     def __init__(self, x, y, color, algorithm_name):
         super().__init__(x, y, color, algorithm_name)
-        self.q_table = {}  # Bảng Q-table
+        self.q_table = {}  
         self.learning_rate = 0.1
         self.discount_factor = 0.9
         self.exploration_rate = 0.3
@@ -563,9 +563,9 @@ class QLearningSeeker(Seeker):
     def get_reward(self, hider_pos):
         """Tính phần thưởng dựa trên khoảng cách tới hider"""
         distance = abs(self.rect.x - hider_pos[0]) + abs(self.rect.y - hider_pos[1])
-        if distance < 30:  # Tìm thấy hider
+        if distance < 30:  
             return 100
-        return -distance / 100  # Phần thưởng âm nếu càng xa
+        return -distance / 100  
     
     def find_path(self, hider_pos):
         """Triển khai Q-learning để tìm đường"""
@@ -640,7 +640,7 @@ def draw_game():
                 x = step[0]
                 y = step[1]
                 s = pygame.Surface((30, 30), pygame.SRCALPHA)
-                s.fill((*seeker.color, 100))  # Màu với độ trong suốt
+                s.fill((*seeker.color, 100))  
                 DISPLAYSURF.blit(s, (x, y))
     
     # Vẽ các seeker với animation
