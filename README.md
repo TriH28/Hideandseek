@@ -71,11 +71,95 @@ Hình ảnh cơ chế hoạt động của game:
             . Phụ thuộc vào chất lượng hàm heuristic
             . Tiêu tốn bộ nhớ để lưu trữ nhiều thông tin
             
-  2.3 Các thuật toán tìm kiếm nội bộ
+2.3 Thuật toán tìm kiếm nội bộ
   
     2.3.1 Các thành phần chính của bài toán tìm kiếm và solution
-      * Thuật toán 
-    
+      * Thuật toán Simple hill climbing
+        _ Các thành phần chính
+          + Hàm Đánh Giá (Heuristic - get_score
+            . Khoảng cách Euclidean: √((x2 - x1)² + (y2 - y1)²).
+            . Dấu - để đảm bảo vị trí càng gần goal thì điểm càng cao (vì thuật toán tìm max)
+          + Hàm Kiểm Tra Đích (is_goal)
+            . Mục đích: Kiểm tra xem seeker đã đến đủ gần hider chưa (khoảng cách < 30 pixel).
+            . Lý do: Tránh việc phải kiểm tra trùng khớp chính xác vị trí, giúp thuật toán linh hoạt hơn.
+          + Danh Sách Láng Giềng (neighbors)
+            . Kiểm tra ranh giới map (0 ≤ x ≤ 1230, 180 ≤ y ≤ 640).
+            . Kiểm tra va chạm với vật cản (check_collision).
+          +  Lựa Chọn Hướng Đi Tốt Nhất (best_neighbor)
+            . Chọn vị trí tốt nhất trong các láng giềng (điểm get_score cao nhất).
+            . Nếu không cải thiện được vị trí hiện tại → dừng thuật toán (đạt cực đại địa phương).
+            . Nếu có cải thiện → di chuyển đến vị trí mới và lặp lại.
+          +  Giới Hạn Số Lần Lặp (max_attempts=100)
+            . Mục đích: Tránh vòng lặp vô hạn nếu không tìm thấy đường đi.
+            . Giá trị mặc định: 100 lần thử.
+        _ Phân tích solution
+          + Ưu điểm
+            . Đơn giản, dễ cài đặt (không cần hàng đợi phức tạp như BFS/A*).
+            . Tốn ít bộ nhớ (chỉ lưu đường đi hiện tại, không lưu toàn bộ không gian trạng thái).
+            . Nhanh trong môi trường đơn giản (nếu không có nhiều vật cản).
+          + Nhược điểm
+            . Dễ mắc kẹt ở cực đại địa phương (nếu bị bao quanh bởi vật cản
+            . Không đảm bảo tìm được đường đi tối ưu (không như BFS/A*).
+            . Phụ thuộc vào hàm heuristic – nếu không tốt, thuật toán có thể đi lệch hướng.
+            
+2.4 Thuật toán tìm kiếm trong môi trường phức tạp
+
+    2.4.1 Các thành phần chính của bài toán tìm kiếm và solution
+      * Thuật toán Partial observation
+        _ Các thành phần chính
+          + Tầm Nhìn (Vision Radius)
+            . Mục đích: Xác định phạm vi mà seeker có thể nhìn thấy hider.
+            . Giải thích: Nếu hider nằm trong vòng bán kính 150px, seeker sẽ biết chính xác vị trí và dùng A* để đuổi bắt.
+          + Bộ Nhớ Vị Trí (last_known_pos và belief_map)
+            . last_known_pos: Lưu vị trí cuối cùng hider được nhìn thấy.
+            . belief_map: Bản đồ niềm tin (belief map) lưu xác suất hider xuất hiện ở các vị trí.
+            . Xác suất giảm dần theo thời gian (0.9 là hệ số decay).
+            . Nếu hider được phát hiện lại, vị trí đó được ưu tiên (+0.5).
+        _ Phân tích solution
+          + Ưu điểm
+            . Mô phỏng thực tế: Seeker chỉ hành động dựa trên thông tin hạn chế, giống game stealth
+            . Khám phá thông minh khi không thấy hider (ưu tiên trung tâm và xa tườn
+            . Fallback an toàn (di chuyển ngẫu nhiên nếu bị kẹt).
+            . Tiết kiệm tài nguyên: Không duyệt toàn bộ map như BFS/A*.
+          + Nhược Điểm
+            . Phụ thuộc vào heuristic
+            . Nếu belief_map không chính xác, seeker có thể đi sai hướng.
+            . Chiến lược khám phá có thể không hiệu quả ở map phức tạp.
+            . Không đảm bảo tìm thấy hider nếu hider trốn ở góc khuất
+
+  2.5 Thuật toán tìm kiếm Reinforcement Learning
+
+    2.5.1 Các thành phần chính của bài toán tìm kiếm và solution
+      * Thuật toán Q-learning
+        _ Các thành phần chính
+          + Q-Table
+            . Mục đích: Lưu trữ giá trị Q (chất lượng) của từng cặp (trạng thái, hành động)
+            . Key: (state, action) - state là vị trí làm tròn của seeker và hider.
+            . Value: Giá trị Q ước lượng.
+          + Tham số học
+            . self.learning_rate = 0.1    # Tốc độ học (alpha)
+            . self.discount_factor = 0.9  # Hệ số chiết khấu (gamma)
+            . self.exploration_rate = 0.3 # Xác suất khám phá ngẫu nhiên (epsilon)
+          + Các phương thức chính
+            . Hàm get_state(). Mục đích: Chuẩn hóa trạng thái thành các ô 30x30 để giảm không gian trạng thái.
+            . Hàm get_possible_actions(). Mục đích: Liệt kê các hành động hợp lệ (không va chạm, trong biên).
+            . Hàm choose_action()
+                30% khám phá ngẫu nhiên.
+                70% chọn hành động có Q-value cao nhất.
+            . Hàm update_q_table()
+                Công thức Q-learning: Q(s,a) = Q(s,a) + α * [r + γ * max(Q(s',a')) - Q(s,a)]
+            . Hàm get_reward()
+                Cộng 100 nếu tìm thấy hider.
+                Phạt tỉ lệ với khoảng cách (-distance/100).
+        _ Phân tích solution
+          + Ưu điểm
+            . Học từ kinh nghiệm: Cải thiện hiệu suất theo thời gian.
+            . Thích nghi với môi trường động: Nếu hider di chuyển, Q-table tự điều chỉnh
+            . Cân bằng khám phá/khai thác: Tránh mắc kẹt ở giải pháp tối ưu cục bộ.
+          + Nhược điểm
+            . Tốn thời gian huấn luyện ban đầu.
+            . Hiệu suất phụ thuộc vào thiết kế phần thưởng.
+            . Không đảm bảo tối ưu như A*.
 
 
 
