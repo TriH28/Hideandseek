@@ -2,11 +2,6 @@
 
 2.Nội dung  
 
-Hình ảnh cơ chế hoạt động của game:
-
-![Hide_and_Seek](https://github.com/user-attachments/assets/bd8bfd79-1169-4ad6-96fe-3223f61399ba)
-
-
   2.1 Các thuật toán tìm kiếm không có thông tin (Uninformed Search)
 
     2.1.1 Các thành phần chính của bài toán tìm kiếm và solution
@@ -127,7 +122,8 @@ Hình ảnh cơ chế hoạt động của game:
             . Chiến lược khám phá có thể không hiệu quả ở map phức tạp.
             . Không đảm bảo tìm thấy hider nếu hider trốn ở góc khuất
 
-  2.5 Thuật toán tìm kiếm Reinforcement Learning
+  2.5 Thuật toán tìm kiếm Constraint Satisfaction Problems (CSPs)
+
 
     2.5.1 Các thành phần chính của bài toán tìm kiếm và solution
       * Thuật toán Partial Observation
@@ -136,8 +132,27 @@ Hình ảnh cơ chế hoạt động của game:
             . Mục đích: Xác định phạm vi mà seeker có thể nhìn thấy hider.
             . Giải thích: Nếu hider nằm trong vòng bán kính 150px, seeker sẽ biết chính xác vị trí và dùng A* để đuổi bắt.
           + Bộ Nhớ Vị Trí (last_known_pos và belief_map)
-            . 
-    
+            . last_known_pos: Lưu vị trí cuối cùng hider được nhìn thấy.
+            . belief_map: Bản đồ niềm tin (belief map) lưu xác suất hider xuất hiện ở các vị trí
+          + Cập nhật niềm tin:
+            . Xác suất giảm dần theo thời gian (0.9 là hệ số decay).
+            . Nếu hider được phát hiện lại, vị trí đó được ưu tiên (+0.5).
+          + Chiến Lược Khi Không Thấy Hider
+            . Hành động: Dùng A* để di chuyển đến vị trí có xác suất cao nhất trong belief_map
+            . Nếu chưa bao giờ thấy hider thì ưu tiên di chuyển đến vùng chưa khám phá, hàm đánh giá (score) cho mỗi hướng
+            . Fallback: Di chuyển ngẫu nhiên
+              Nếu không có hướng nào khả thi (bị bao vây bởi vật cản), chọn ngẫu nhiên
+        _ Phân tích solution
+          + Ưu điểm
+            . Mô phỏng thực tế: Seeker chỉ hành động dựa trên thông tin hạn chế, giống game stealth
+            . A* khi biết vị trí hider.
+            . Khám phá thông minh khi không thấy hider (ưu tiên trung tâm và xa tường).
+            . Fallback an toàn (di chuyển ngẫu nhiên nếu bị kẹt).
+            . Tiết kiệm tài nguyên: Không duyệt toàn bộ map như BFS/A*.
+          + Nhược điểm
+            . Nếu belief_map không chính xác, seeker có thể đi sai hướng.
+            . Chiến lược khám phá có thể không hiệu quả ở map phức tạp.
+            . Không đảm bảo tìm thấy hider nếu hider trốn ở góc khuất
             
 2.6 Thuật toán tìm kiếm Reinforcement Learning
 
@@ -172,6 +187,10 @@ Hình ảnh cơ chế hoạt động của game:
             . Tốn thời gian huấn luyện ban đầu.
             . Hiệu suất phụ thuộc vào thiết kế phần thưởng.
             . Không đảm bảo tối ưu như A*.n
+
+  3. Hình ảnh gif so sánh các nhóm thuật toán
+  ![Hide_and_Seek](https://github.com/user-attachments/assets/bd8bfd79-1169-4ad6-96fe-3223f61399ba)
+
       
     
 
