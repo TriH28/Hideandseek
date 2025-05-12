@@ -1,5 +1,12 @@
 1.Mục tiêu
-
+```
+Trong thời đại mà trí tuệ nhân tạo ngày càng được ứng dụng rộng rãi trong nhiều lĩnh vực, từ y tế, giao thông, tài chính cho đến trò chơi điện tử, việc xây dựng một mô hình trực quan nhằm minh họa hoạt động của các thuật toán AI là điều vô cùng thiết thực. Xuất phát từ ý tưởng đó, đồ án này chúng em tập trung phát triển một trò chơi mô phỏng mang tên “Hide and Seek” (Trốn tìm) – một trò chơi dân gian quen thuộc – trong không gian 2D, với mục tiêu không chỉ giải trí mà còn phục vụ nghiên cứu và học tập. 
+- Xây dựng game "Hide and Seek" với 6 thuật toán tìm kiếm.
+- Ứng dụng các thuật toán AI vào trò chơi trốn tìm dân gian.
+- So sánh thời gian, hiệu suất của từng thuật toán.
+- Biến lý thuyết thuật toán thành hành vi cụ thể trên bản đồ game.
+- Tăng tính trực quan, thực hành cho các khái niệm AI trừu tượng.
+```
 2.Nội dung  
 
   2.1 Các thuật toán tìm kiếm không có thông tin (Uninformed Search)
