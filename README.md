@@ -1,6 +1,9 @@
 1.Mục tiêu
 
-2.Nội dung
+2.Nội dung  
+
+Hình ảnh cơ chế hoạt động của game:
+
 ![Hide_and_Seek](https://github.com/user-attachments/assets/bd8bfd79-1169-4ad6-96fe-3223f61399ba)
 
 
