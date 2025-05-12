@@ -130,6 +130,18 @@ Hình ảnh cơ chế hoạt động của game:
   2.5 Thuật toán tìm kiếm Reinforcement Learning
 
     2.5.1 Các thành phần chính của bài toán tìm kiếm và solution
+      * Thuật toán Partial Observation
+        _ Các thành phần chính 
+          + Tầm Nhìn (Vision Radius)
+            . Mục đích: Xác định phạm vi mà seeker có thể nhìn thấy hider.
+            . Giải thích: Nếu hider nằm trong vòng bán kính 150px, seeker sẽ biết chính xác vị trí và dùng A* để đuổi bắt.
+          + Bộ Nhớ Vị Trí (last_known_pos và belief_map)
+            . 
+    
+            
+2.6 Thuật toán tìm kiếm Reinforcement Learning
+
+     2.5.1 Các thành phần chính của bài toán tìm kiếm và solution
       * Thuật toán Q-learning
         _ Các thành phần chính
           + Q-Table
@@ -159,7 +171,9 @@ Hình ảnh cơ chế hoạt động của game:
           + Nhược điểm
             . Tốn thời gian huấn luyện ban đầu.
             . Hiệu suất phụ thuộc vào thiết kế phần thưởng.
-            . Không đảm bảo tối ưu như A*.
+            . Không đảm bảo tối ưu như A*.n
+      
+    
 
 
 
