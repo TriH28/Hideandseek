@@ -1,6 +1,8 @@
 1.Mục tiêu
 
 2.Nội dung
+![Hide_and_Seek](https://github.com/user-attachments/assets/bd8bfd79-1169-4ad6-96fe-3223f61399ba)
+
 
   2.1 Các thuật toán tìm kiếm không có thông tin (Uninformed Search)
 
