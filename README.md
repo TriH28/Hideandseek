@@ -188,8 +188,19 @@
             . Hiệu suất phụ thuộc vào thiết kế phần thưởng.
             . Không đảm bảo tối ưu như A*.n
 
-  3. Hình ảnh gif so sánh các nhóm thuật toán
-  ![Hide_and_Seek](https://github.com/user-attachments/assets/bd8bfd79-1169-4ad6-96fe-3223f61399ba)
+  3. Hình ảnh gif so sánh các nhóm thuật toán  
+- Mức độ dễ:
+
+ ![Hide_and_Seek_Easy](https://github.com/user-attachments/assets/4b6a0a18-ffa1-4733-af37-7c1487d05808)
+
+- Mức độ trung bình:
+
+![Hide_and_Seek_Medium](https://github.com/user-attachments/assets/6f01ab55-5788-46d7-a73a-c4c699b23f1c) 
+
+- Mức độ khó:
+
+![Hide_and_Seek_Hard](https://github.com/user-attachments/assets/43459c2d-b813-43c7-ab17-86d1145e1bea)
+
 
       
     
