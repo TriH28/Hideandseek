@@ -20,10 +20,12 @@ SETTINGS = 2
 HIDING = 3
 SEEKING = 4
 GAME_OVER = 5
-game_state = MAIN_MENU  
+game_state = MAIN_MENU
+DIFFICULTY_LEVEL = 3  # 1: Dễ, 2: Trung bình, 3: Khó
+difficulty_changed = False
 
 # Cài đặt game
-SEEKING_TIME = 15  
+SEEKING_TIME = 25 
 
 seeking_timer = SEEKING_TIME
 game_result = None  
@@ -47,17 +49,15 @@ FPS = 30
 
 # Load hình ảnh
 def load_image(path, size=None):
+    full_path = os.path.join(os.path.dirname(__file__), path)
     try:
-        img = pygame.image.load(path).convert_alpha()
+        img = pygame.image.load(full_path).convert_alpha()
         if size:
             img = pygame.transform.scale(img, size)
         return img
     except:
-        print(f"Không tìm thấy ảnh tại {path}")
-        # Tạo ảnh placeholder nếu không tìm thấy file
-        surf = pygame.Surface((size if size else (50, 50)))
-        surf.fill(RED if "Hun" in path else BLUE)
-        return surf
+        print(f"Không tìm thấy ảnh tại {full_path}")
+        return None
 
 # Đường dẫn hình ảnh
 image_path = "Image"
@@ -645,6 +645,10 @@ def draw_game():
     
     # Vẽ các seeker với animation
     for seeker in seekers:
+        # Thêm hiển thị độ khó
+        font = pygame.font.Font(None, 36)
+        difficulty_text = font.render(f"Difficulty: {['Easy', 'Medium', 'Hard'][DIFFICULTY_LEVEL-1]}", True, WHITE)
+        DISPLAYSURF.blit(difficulty_text, (1000, 10))
         if not seeker.found:
             seeker.update_animation()
             current_image = seeker_animations[seeker.direction][seeker.animation_frame]
@@ -800,59 +804,122 @@ def draw_instructions():
     text_surface = font.render(instruction, True, color)
     DISPLAYSURF.blit(text_surface, (10, 50))
 
+def draw_settings():
+    DISPLAYSURF.blit(setbackground, (0, 0))
+    
+    # Vẽ nút back
+    mouse_pos = pygame.mouse.get_pos()
+    if 50 <= mouse_pos[0] <= 150 and 50 <= mouse_pos[1] <= 90:
+        DISPLAYSURF.blit(back_button_hover, (50, 50))
+    else:
+        DISPLAYSURF.blit(back_button, (50, 50))
+    
+    # Vẽ nội dung settings
+    font = pygame.font.Font(None, 36)
+    settings = [
+        "Settings:",
+        f"Difficulty: {['Easy', 'Medium', 'Hard'][DIFFICULTY_LEVEL-1]}",
+        "Search time: 15 seconds",
+        "Number of seekers: 5",
+        "Map size: 1260x670",
+        "Click to change difficulty"
+    ]
+    
+    y = 200
+    for setting in settings:
+        text = font.render(setting, True, WHITE)
+        DISPLAYSURF.blit(text, (100, y))
+        y += 50
+    
+    # Vẽ các nút độ khó
+    for i in range(3):
+        if DIFFICULTY_LEVEL == i+1:
+            color = GREEN
+        else:
+            color = GRAY
+        pygame.draw.rect(DISPLAYSURF, color, (400 + i*150, 400, 120, 50))
+        diff_text = font.render(["Easy", "Medium", "Hard"][i], True, WHITE)
+        DISPLAYSURF.blit(diff_text, (430 + i*150, 415))
+
 def reset_game():
     global game_state, seeking_timer, hider_rect, seekers, random_tuples
-    global current_dir, animation_frame, animation_timer
+    global current_dir, animation_frame, animation_timer, DIFFICULTY_LEVEL, difficulty_changed
     
-    # Tạo map mới với các block ngẫu nhiên
+    # Tạo map mới theo độ khó
     random_tuples = []
-    for _ in range(50):
-        xStone = random.choice([x for x in range(60, 1201) if x % 60 == 0])
-        yStone = random.choice([x for x in range(220, 601) if x % 60 == 0])
-        while any((xStone, yStone) == (t[0], t[1]) for t in random_tuples):
-            xStone = random.choice([x for x in range(60, 1201) if x % 60 == 0])
-            yStone = random.choice([x for x in range(220, 601) if x % 60 == 0])
+    num_blocks = 30  # Số lượng block cơ bản
+    
+    if DIFFICULTY_LEVEL == 3:  # Dễ
+        num_blocks = 25 
+        block_range_x = (120, 1080)
+        block_range_y = (240, 540)
+    elif DIFFICULTY_LEVEL == 2:  # Trung bình
+        num_blocks = 35 
+        block_range_x = (60, 1140)
+        block_range_y = (220, 580)
+    else:  # Khó
+        num_blocks = 45
+        block_range_x = (60, 1140)
+        block_range_y = (220, 580)
+
+    # Tạo hider ở vị trí cố định
+    hider_rect = pygame.Rect(0, 180, 30, 30)
+    
+    # Tạo seekers ở cùng 1 vị trí (xếp thành hàng ngang)
+    algorithms = ["BFS", "A*", "Backtracking", "Partial Observation", "Simple Hill", "Q-learning"]
+    colors = COLORS + [(255, 165, 0)]
+    
+    seekers = []
+    seeker_start_x = 600 # Vị trí xuất phát chung (giữa màn hình)
+    seeker_start_y = 180
+    
+    # Danh sách vị trí cấm (nơi không được đặt block)
+    forbidden_positions = [
+        (hider_rect.x, hider_rect.y)  # Vị trí hider
+    ]
+    
+    # Thêm vị trí các seekers vào danh sách cấm
+    for i in range(6):
+        x = seeker_start_x + i * 30  # Xếp các seekers thành hàng ngang
+        y = seeker_start_y
+        forbidden_positions.append((x, y))
+        if algorithms[i] == "Q-learning":
+            seekers.append(QLearningSeeker(x, y, colors[i], algorithms[i]))
+        else:
+            seekers.append(Seeker(x, y, colors[i], algorithms[i]))
+
+
+    # Tạo các block, đảm bảo không đè lên hider và seekers
+    for _ in range(num_blocks):
+        while True:
+            xStone = random.choice([x for x in range(block_range_x[0], block_range_x[1]+1) if x % 60 == 0])
+            yStone = random.choice([x for x in range(block_range_y[0], block_range_y[1]+1) if x % 60 == 0])
+            
+            # Kiểm tra không trùng với vị trí cấm
+            collision = False
+            for (fx, fy) in forbidden_positions:
+                if abs(xStone - fx) < 90 and abs(yStone - fy) < 90:  # Khoảng cách an toàn 90px
+                    collision = True
+                    break
+            
+            # Kiểm tra không trùng với block khác
+            if not collision and not any((xStone, yStone) == (t[0], t[1]) for t in random_tuples):
+                break
+        
         block_type = random.choice([0, 1, 2, 3, 4, 5])
         random_tuples.append((xStone, yStone, block_type))
     
     game_state = HIDING
     seeking_timer = SEEKING_TIME
-    hider_rect = pygame.Rect(0, 180, 30, 30)
     current_dir = 'right'
     animation_frame = 0
     animation_timer = 0
     
-    # Reset seekers với vị trí ngẫu nhiên
-    seekers = []
-    valid_positions = []
-    for x in range(0, 1231, 60):
-        for y in range(180, 601, 60):
-            valid = True
-            for (bx, by, _) in random_tuples:
-                if abs(x - bx) < 60 and abs(y - by) < 60:
-                    valid = False
-                    break
-            if valid:
-                valid_positions.append((x, y))
-    
-    algorithms = ["BFS", "A*", "Backtracking", "Partial Observation", "Simple Hill", "Q-learning"]
-    colors = COLORS + [(255, 165, 0)]  # Thêm màu cam cho Q-learning
-    
-    if valid_positions:
-        x, y = random.choice(valid_positions)
-        for i in range(6):
-            if algorithms[i] == "Q-learning":
-                seekers.append(QLearningSeeker(x, y, colors[i], algorithms[i]))
-            else:
-                seekers.append(Seeker(x, y, colors[i], algorithms[i]))
-    else:
-        if algorithms[i] == "Q-learning":
-            seekers.append(QLearningSeeker(i*60, 180, colors[i], algorithms[i]))
-        else:
-            seekers.append(Seeker(i*60, 180, colors[i], algorithms[i]))
+    difficulty_changed = False
 
 def main():
     global game_state, seeking_timer, current_dir, animation_frame, animation_timer
+    global DIFFICULTY_LEVEL, difficulty_changed
     
     while True:
         for event in pygame.event.get():
@@ -862,16 +929,13 @@ def main():
                 
             if event.type == KEYDOWN:
                 if event.key == K_RETURN and game_state == HIDING:
-                   
                     game_state = SEEKING
                     seeking_timer = SEEKING_TIME
                     for seeker in seekers:
                         seeker.start_time = time.time()
                 elif event.key == K_r and game_state == GAME_OVER:
-                    
                     reset_game()
                 elif event.key == K_ESCAPE:
-                    
                     if game_state == MAIN_MENU:
                         pygame.quit()
                         sys.exit()
@@ -882,20 +946,29 @@ def main():
                 if game_state == MAIN_MENU:
                     mouse_pos = pygame.mouse.get_pos()
                     if 530 <= mouse_pos[0] <= 730 and 300 <= mouse_pos[1] <= 350:
-                        
                         reset_game()
                         game_state = HIDING
                     elif 530 <= mouse_pos[0] <= 730 and 400 <= mouse_pos[1] <= 450:
-                       
                         game_state = RULES
                     elif 530 <= mouse_pos[0] <= 730 and 500 <= mouse_pos[1] <= 550:
-                        
                         game_state = SETTINGS
+                elif game_state == SETTINGS:
+                    mouse_pos = pygame.mouse.get_pos()
+                    if 50 <= mouse_pos[0] <= 150 and 50 <= mouse_pos[1] <= 90:
+                        game_state = MAIN_MENU
+                    # Kiểm tra click vào nút độ khó
+                    for i in range(3):
+                        if 400 + i*150 <= mouse_pos[0] <= 520 + i*150 and 400 <= mouse_pos[1] <= 450:
+                            DIFFICULTY_LEVEL = i + 1
+                            difficulty_changed = True
                 elif game_state in [RULES, SETTINGS]:
                     mouse_pos = pygame.mouse.get_pos()
                     if 50 <= mouse_pos[0] <= 150 and 50 <= mouse_pos[1] <= 90:
-                        
                         game_state = MAIN_MENU
+        
+        # Nếu độ khó thay đổi, reset game
+        if difficulty_changed:
+            reset_game()
         
         # Xử lý di chuyển hider
         keys = pygame.key.get_pressed()
